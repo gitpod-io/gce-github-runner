@@ -25,7 +25,6 @@ usermod -aG sudo ${RUNNER_USER}
 usermod -aG docker ${RUNNER_USER}
 echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers
 echo "Defaults env_keep += \"DEBIAN_FRONTEND\"" >> /etc/sudoers
-echo "✅ User ${RUNNER_USER} successfully created"
 
 apt-get update
 apt-get install -y \
@@ -48,7 +47,7 @@ echo "📝 Removing snapd to avoid performance issues on boot..."
 apt remove -y --autoremove snapd
 
 echo "📝 Copying rootfs..."
-rsync -aW --no-o --no-g --no-compress /tmp/rootfs/* /
+rsync -aHW --no-o --no-g --no-compress /tmp/rootfs/* /
 
 echo "📝 Installing base packages required in the image..."
 apt-get dist-upgrade -y
@@ -158,7 +157,6 @@ su -c /usr/local/bin/setup-runner.s runner
 echo "📝 Customizing the runner variables..."
 echo PATH=$PATH >>/${RUNNER_DIR}/.bashrc
 echo KUBEBUILDER_ASSETS=/usr/local/bin/k8s/1.26.1-linux-amd64 >>/${RUNNER_DIR}/.bashrc
-echo '✅ .bashrc for user ${RUNNER_USER} updated'
 
 cat <<-EOF >/actions-runner/wait-for-config.sh
 	#!/bin/bash
