@@ -54,14 +54,17 @@ build {
     destination = "/tmp/setup.sh"
   }
 
+  provisioner "shell-local" {
+    command = "tar -cvf ${path.root}/rootfs.tar -C ${path.root}/rootfs ."
+  }
+
   provisioner "file" {
-    source      = "${path.root}/rootfs"
-    destination = "/tmp/rootfs"
+    source      = "${path.root}/rootfs.tar"
+    destination = "/tmp/"
+    generated   = true
   }
   
   provisioner "shell" {
-    inline = [
-      "sudo -E bash -c 'cd /tmp; chmod +x ./setup.sh;./setup.sh'",
-    ]
+    script = "packer-shell-script.sh"
   }
 }

@@ -46,9 +46,6 @@ apt-get update
 echo "📝 Removing snapd to avoid performance issues on boot..."
 apt remove -y --autoremove snapd
 
-echo "📝 Copying rootfs..."
-rsync -avz /tmp/rootfs/ /
-
 echo "📝 Installing base packages required in the image..."
 apt-get dist-upgrade -y
 apt-get install -y \
@@ -152,7 +149,8 @@ curl -sfSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscli
 	rm -rf aws awscliv2.zip
 
 echo "📝 Installing required packages for the action execution..."
-su -c /usr/local/bin/setup-runner.s runner
+su -c /setup-runner.sh runner
+rm /setup-runner.sh
 
 echo "📝 Customizing the runner variables..."
 echo PATH=$PATH >>/${RUNNER_DIR}/.bashrc
