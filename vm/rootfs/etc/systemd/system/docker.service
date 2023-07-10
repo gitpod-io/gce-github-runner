@@ -28,17 +28,3 @@ OOMScoreAdjust=-500
 
 [Install]
 WantedBy=multi-user.target
-EOF
-
-cat <<EOF > /lib/systemd/system/docker.socket
-[Unit]
-Description=Docker Socket for the API
-
-[Socket]
-ListenStream=/run/docker.sock
-SocketMode=0660
-SocketUser=root
-SocketGroup=docker
-
-[Install]
-WantedBy=sockets.target

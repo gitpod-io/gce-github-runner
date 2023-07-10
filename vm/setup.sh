@@ -90,8 +90,8 @@ curl -fLo /usr/libexec/docker/cli-plugins/docker-compose https://github.com/dock
 chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/bin/docker-compose
 
-curl -fLo /usr/libexec/docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${DOCKER_BUILDX_VERSION}/buildx-v${DOCKER_BUILDX_VERSION}.linux-amd64 \
-chmod +x /usr/libexec/docker/cli-plugins/docker-buildx \
+curl -fLo /usr/libexec/docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${DOCKER_BUILDX_VERSION}/buildx-v${DOCKER_BUILDX_VERSION}.linux-amd64
+chmod +x /usr/libexec/docker/cli-plugins/docker-buildx
 ln -s /usr/libexec/docker/cli-plugins/docker-buildx /usr/bin/docker-buildx
 
 systemctl daemon-reload

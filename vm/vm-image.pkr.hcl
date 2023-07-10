@@ -55,7 +55,7 @@ build {
   }
 
   provisioner "shell-local" {
-    command = "tar -cvf ${path.root}/rootfs.tar -C ${path.root}/rootfs ."
+    command = "tar -cvf ${path.root}/rootfs.tar rootfs"
   }
 
   provisioner "file" {
