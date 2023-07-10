@@ -47,7 +47,7 @@ echo "📝 Removing snapd to avoid performance issues on boot..."
 apt remove -y --autoremove snapd
 
 echo "📝 Copying rootfs..."
-rsync -aHW --no-o --no-g --no-compress /tmp/rootfs/* /
+rsync -avz /tmp/rootfs/ /
 
 echo "📝 Installing base packages required in the image..."
 apt-get dist-upgrade -y
@@ -185,11 +185,6 @@ rm -rf /etc/netplan/*
 
 echo "📝 Removing cloud-init configuration..."
 cloud-init clean --logs --seed
-
-echo "📝 Changing SSH port to 2222"
-cat <<EOF >/etc/ssh/sshd_config.d/gitpod.conf
-Port 2222
-EOF
 
 echo "♻️ Cleanup..."
 rm /etc/hostname
