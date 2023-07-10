@@ -1,0 +1,19 @@
+[Unit]
+Description=Connect self hosted runner (to Github)
+Wants=network-online.target
+After=network.target network-online.target docker.service
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=runner
+Group=docker
+ExecStart=/actions-runner/wait-for-config.sh
+TimeoutStartSec=0
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

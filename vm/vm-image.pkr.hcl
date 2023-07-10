@@ -54,6 +54,11 @@ build {
     destination = "/tmp/setup.sh"
   }
 
+  provisioner "file" {
+    source      = "${path.root}/rootfs"
+    destination = "/tmp/rootfs"
+  }
+  
   provisioner "shell" {
     inline = [
       "sudo -E bash -c 'cd /tmp; chmod +x ./setup.sh;./setup.sh'",

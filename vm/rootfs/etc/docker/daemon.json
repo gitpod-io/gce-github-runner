@@ -1,0 +1,10 @@
+{
+    "mtu": 1440,
+    "builder": {
+        "gc": {
+            "defaultKeepStorage": "20GB",
+            "enabled": true
+        }
+    },
+    "experimental": true
+}

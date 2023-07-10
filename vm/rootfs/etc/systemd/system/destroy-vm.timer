@@ -1,0 +1,9 @@
+[Unit]
+Description="Run destroy-vm.service 1d after boot relative to activation time"
+
+[Timer]
+OnBootSec=2h
+Unit=destroy-vm.service
+
+[Install]
+WantedBy=multi-user.target

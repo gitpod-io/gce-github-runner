@@ -1,0 +1,5 @@
+[Unit]
+Description="Systemd service that invokes the script that destroys a VM"
+
+[Service]
+ExecStart=/etc/systemd/system/shutdown.sh
