@@ -1,0 +1,95 @@
+name: "Ephemeral GCE GitHub self-hosted runner"
+description: >-
+  Creates ephemeral GCE based GitHub Action self-hosted runner.
+  It uses startup script to bootstrap the VM.
+branding:
+  icon: triangle
+  color: purple
+inputs:
+  token:
+    description: >-
+      GitHub auth token, needs `repo`/`public_repo` scope: https://docs.github.com/en/rest/reference/actions#self-hosted-runners.
+    required: true
+  project_id: 
+    description: >-
+      ID of the Google Cloud Platform project. If provided, this will configure gcloud to use this project ID.
+    required: false
+    default: gitpod-core-dev
+  machine_zone:
+    description: GCE zone
+    default: "europe-west1-b"
+    required: true
+  machine_type:
+    description: GCE machine type; https://cloud.google.com/compute/docs/machine-types
+    default: "n2d-standard-8"
+    required: true
+  disk_size:
+    description: VM disk size.
+    required: false
+  runner_service_account:
+    description: Service account of the VM, defaults to default compute service account.
+    required: false
+  image_project:
+    description: >
+      The Google Cloud project against which all image and image family references will be resolved.
+    required: false
+    default: gitpod-core-dev
+  image:
+    description: Specifies the name of the image that the disk will be initialized with.
+    required: false
+    default: gh-runner-202307101349
+  image_family:
+    description: The image family for the operating system that the boot disk will be initialized with.
+    required: false
+  preemptible:
+    description: Use GCE preemptible VM instance; https://cloud.google.com/compute/docs/instances/preemptible
+    default: true
+    required: true
+  ephemeral:
+    description: Set GitHub runner to be ephemeral; https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling
+    default: false
+    required: true
+  scopes:
+    description: Scopes granted to the VM, defaults to full access (cloud-platform).
+    default: cloud-platform
+    required: true
+  shutdown_timeout:
+    description: "Shutdown grace period (in seconds)."
+    default: 30
+    required: true
+outputs:
+  label:
+    description: >-
+      Unique runner label. This label can be used to request a specific
+      runner for the workflow job.
+    value: ${{ steps.gce-github-runner-script.outputs.label }}
+runs:
+  using: "composite"
+  steps:
+    - id: check-repository
+      if: github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+      shell: bash
+      run: |
+        echo "❌ Job actions are not allowed to run in forks" >> $GITHUB_STEP_SUMMARY
+        exit 1
+    - id: gce-github-runner-script
+      if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+      shell: bash
+      run: >
+        ${{ github.action_path }}/action.sh
+        --command=start
+        --token=${{ inputs.token }}
+        --project_id=${{ inputs.project_id }}
+        --runner_ver=${{ inputs.runner_ver }}
+        --machine_zone=${{ inputs.machine_zone }}
+        --machine_type=${{ inputs.machine_type }}
+        --disk_size=${{ inputs.disk_size }}
+        --scopes=${{ inputs.scopes }}
+        --shutdown_timeout=${{ inputs.shutdown_timeout }}
+        --runner_service_account=${{ inputs.runner_service_account }}
+        --image_project=${{ inputs.image_project }}
+        --image=${{ inputs.image }}
+        --image_family=${{ inputs.image_family }}
+        --boot_disk_type=${{ inputs.boot_disk_type }}
+        --preemptible=${{ inputs.preemptible }}
+        --ephemeral=${{ inputs.ephemeral }}
