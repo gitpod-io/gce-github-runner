@@ -26,7 +26,7 @@ inputs:
   disk_size:
     description: VM disk size.
     required: false
-    default: 150GB
+    default: 200GB
   runner_service_account:
     description: Service account of the VM, defaults to default compute service account.
     required: false
