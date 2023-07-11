@@ -91,6 +91,6 @@ runs:
         --image_project=${{ inputs.image_project }}
         --image=${{ inputs.image }}
         --image_family=${{ inputs.image_family }}
-        --boot_disk_type=${{ inputs.boot_disk_type }}
+        --boot_disk_type=pd-ssd
         --preemptible=${{ inputs.preemptible }}
         --ephemeral=${{ inputs.ephemeral }}
