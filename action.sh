@@ -213,7 +213,6 @@ FILE_EOF
 		${image_family_flag} \
 		${preemptible_flag} \
 		--maintenance-policy="TERMINATE" \
-		--labels=gh_ready=0 \
 		--metadata-from-file="startup-script=startup-script.sh" \
 		--metadata-from-file="shutdown-script=shutdown-script.sh" &&
 		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
