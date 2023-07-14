@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 RUNNER_USER="runner"
 RUNNER_DIR="/home/${RUNNER_USER}"
-RUNNER_VER=2.305.0
+RUNNER_VER=2.306.0
 
 HELM_VERSION=3.12.1
 
@@ -171,7 +171,8 @@ EOF
 chmod +x /actions-runner/wait-for-config.sh
 
 systemctl daemon-reload
-systemctl enable github-runner
+systemctl enable github-runner-1
+systemctl enable github-runner-2
 systemctl enable destroy-vm.timer
 
 echo "📝 Removing old packages..."

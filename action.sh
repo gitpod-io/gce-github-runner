@@ -34,7 +34,6 @@ scopes=
 shutdown_timeout=
 preemptible=
 ephemeral=
-maintenance_policy_terminate=
 
 OPTLIND=1
 while getopts_long :h opt \
@@ -54,7 +53,6 @@ while getopts_long :h opt \
 	shutdown_timeout required_argument \
 	preemptible required_argument \
 	ephemeral required_argument \
-	maintenance_policy_terminate optional_argument \
 	help no_argument "" "$@"; do
 	case "$opt" in
 	command)
@@ -105,9 +103,6 @@ while getopts_long :h opt \
 	ephemeral)
 		ephemeral=$OPTLARG
 		;;
-	maintenance_policy_terminate)
-		maintenance_policy_terminate=${OPTLARG-$maintenance_policy_terminate}
-		;;
 	h | help)
 		usage
 		exit 0
@@ -136,22 +131,33 @@ function start_vm {
 	boot_disk_type_flag=$([[ -z "${boot_disk_type}" ]] || echo "--boot-disk-type=${boot_disk_type}")
 	preemptible_flag=$([[ "${preemptible}" == "true" ]] && echo "--preemptible" || echo "")
 	ephemeral_flag=$([[ "${ephemeral}" == "true" ]] && echo "--ephemeral" || echo "")
-	maintenance_policy_flag=$([[ -z "${maintenance_policy_terminate}" ]] || echo "--maintenance-policy=TERMINATE")
 	project_id_flag=$(echo "--project=${project_id}")
 
 	echo "The new GCE VM will be ${VM_ID}"
 
-	startup_script=$(
-		cat <<OUT_EOF
+	cat <<FILE_EOF >startup-script.sh
 #!/bin/bash
 
 set -e
 set -x
 
-gcloud compute instances add-labels "${VM_ID}" --zone="${machine_zone}" --labels=gh_ready=0
-
+# leeway temporal directories
 chmod 777 /var/tmp
 chmod 777 -R /var/tmp
+
+cleanup() {
+    echo "Removing runner..."
+    REMOVE_TOKEN=\$(curl \
+        -X POST \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${RUNNER_TOKEN}" \
+        https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runners/remove-token | jq .token --raw-output)
+
+    ./config.sh remove --token \${REMOVE_TOKEN}
+}
+
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
 
 # Create a systemd service in charge of shutting down the machine once the workflow has finished
 cat <<-EOF >/etc/systemd/system/shutdown.sh
@@ -169,31 +175,35 @@ touch /.github-runner-config-ready
 gcloud compute instances add-labels "${VM_ID}" --zone="${machine_zone}" --labels=gh_ready=1
 echo "Setup complete."
 
-OUT_EOF
-	)
+FILE_EOF
 
-	shutdown_script=$(
-		cat <<OUT_EOF
+	cat <<FILE_EOF >shutdown-script.sh
 #!/bin/bash
 
 set -e
 set -x
 
-pushd /actions-runner || exit 1
+pushd /actions-runner || exit 0
 
-REMOVE_TOKEN=\$(curl -s -X POST https://api.github.com/repos/"${GITHUB_REPOSITORY}"/actions/runners/remove-token -H "accept: application/vnd.github.everest-preview+json" -H "authorization: token ${RUNNER_TOKEN}" | jq -r '.token')
+echo "Removing runner..."
+REMOVE_TOKEN=\$(curl \
+	-X POST \
+	-H "Accept: application/vnd.github+json" \
+	-H "Authorization: Bearer ${RUNNER_TOKEN}" \
+	https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runners/remove-token | jq .token --raw-output)
 if [ -z "\$REMOVE_TOKEN" ]; then 
-	fatal "Failed to get a token";
+	echo "Failed to get a removal token"
+	exit 0
 fi 
 
-./config.sh remove --token \$REMOVE_TOKEN
+./config.sh remove --token \${REMOVE_TOKEN}
 
-OUT_EOF
-	)
+FILE_EOF
 
 	gcloud compute instances create "${VM_ID}" \
 		${project_id_flag} \
 		--zone="${machine_zone}" \
+		--labels="gh_ready=0" \
 		${disk_size_flag} \
 		${boot_disk_type_flag} \
 		--machine-type="${machine_type}" \
@@ -202,9 +212,10 @@ OUT_EOF
 		${image_flag} \
 		${image_family_flag} \
 		${preemptible_flag} \
-		${maintenance_policy_flag} \
+		--maintenance-policy="TERMINATE" \
 		--labels=gh_ready=0 \
-		--metadata=startup-script="$startup_script,shutdown-script=$shutdown_script" &&
+		--metadata-from-file="startup-script=startup-script.sh" \
+		--metadata-from-file="shutdown-script=shutdown-script.sh" &&
 		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
 
 	safety_off
