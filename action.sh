@@ -135,7 +135,7 @@ function start_vm {
 
 	echo "The new GCE VM will be ${VM_ID}"
 
-	cat <<FILE_EOF >startup-script.sh
+	cat <<FILE_EOF >/tmp/startup-script.sh
 #!/bin/bash
 
 set -e
@@ -177,7 +177,7 @@ echo "Setup complete."
 
 FILE_EOF
 
-	cat <<FILE_EOF >shutdown-script.sh
+	cat <<FILE_EOF >/tmp/shutdown-script.sh
 #!/bin/bash
 
 set -e
@@ -200,6 +200,9 @@ fi
 
 FILE_EOF
 
+	chmod +x /tmp/startup-script.sh
+	chmod +x /tmp/shutdown-script.sh
+
 	gcloud compute instances create "${VM_ID}" \
 		${project_id_flag} \
 		--zone="${machine_zone}" \
@@ -213,8 +216,7 @@ FILE_EOF
 		${image_family_flag} \
 		${preemptible_flag} \
 		--maintenance-policy="TERMINATE" \
-		--metadata-from-file="startup-script=startup-script.sh" \
-		--metadata-from-file="shutdown-script=shutdown-script.sh" &&
+		--metadata-from-file="startup-script=/tmp/startup-script.sh,shutdown-script=/tmp/shutdown-script.sh" &&
 		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
 
 	safety_off
