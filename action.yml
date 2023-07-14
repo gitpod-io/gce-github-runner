@@ -38,7 +38,7 @@ inputs:
   image:
     description: Specifies the name of the image that the disk will be initialized with.
     required: false
-    default: gh-runner-202307140906
+    default: gh-runner-202307141054
   image_family:
     description: The image family for the operating system that the boot disk will be initialized with.
     required: false

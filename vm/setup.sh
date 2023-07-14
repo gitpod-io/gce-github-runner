@@ -122,14 +122,26 @@ apt-get update
 apt-get install -y google-cloud-cli
 
 echo "📝 Installing actions-runner..."
-mkdir /actions-runner
+RUNNER_TGZ=/tmp/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
 
-pushd /actions-runner || exit 1
-curl -o actions-runner-linux-x64-${RUNNER_VER}.tar.gz -L https://github.com/actions/runner/releases/download/v${RUNNER_VER}/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
-tar xzf ./actions-runner-linux-x64-${RUNNER_VER}.tar.gz
-chown -R ${RUNNER_USER} /actions-runner
+curl -o "${RUNNER_TGZ}" -L https://github.com/actions/runner/releases/download/v${RUNNER_VER}/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
+
+mkdir -p /actions-runner-1 /actions-runner-2
+
+pushd /actions-runner-1 || exit 1
+tar xzf "${RUNNER_TGZ}"
+chown -R ${RUNNER_USER} /actions-runner-1
 ./bin/installdependencies.sh
 popd || exit 1
+
+pushd /actions-runner-2 || exit 1
+curl -o actions-runner-linux-x64-${RUNNER_VER}.tar.gz -L https://github.com/actions/runner/releases/download/v${RUNNER_VER}/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
+tar xzf "${RUNNER_TGZ}"
+chown -R ${RUNNER_USER} /actions-runner-2
+./bin/installdependencies.sh
+popd || exit 1
+
+rm -f "${RUNNER_TGZ}"
 
 echo "📝 Installing leeway..."
 LEEWAY_MAX_PROVENANCE_BUNDLE_SIZE=8388608
@@ -156,7 +168,7 @@ echo "📝 Customizing the runner variables..."
 echo PATH=$PATH >>/${RUNNER_DIR}/.bashrc
 echo KUBEBUILDER_ASSETS=/usr/local/bin/k8s/1.26.1-linux-amd64 >>/${RUNNER_DIR}/.bashrc
 
-cat <<-EOF >/actions-runner/wait-for-config.sh
+cat <<-EOF >/actions-runner-1/wait-for-config.sh
 	#!/bin/bash
 	set -e
 
@@ -165,10 +177,23 @@ cat <<-EOF >/actions-runner/wait-for-config.sh
 	   sleep 1
 	done
 
-	/actions-runner/run.sh
+	/actions-runner-1/run.sh
 EOF
 
-chmod +x /actions-runner/wait-for-config.sh
+cat <<-EOF >/actions-runner-2/wait-for-config.sh
+	#!/bin/bash
+	set -e
+
+	while ! [ -f /.github-runner-config-ready ];do
+	   echo -n '#'
+	   sleep 1
+	done
+
+	/actions-runner-2/run.sh
+EOF
+
+chmod +x /actions-runner-1/wait-for-config.sh
+chmod +x /actions-runner-2/wait-for-config.sh
 
 systemctl daemon-reload
 systemctl enable github-runner-1
