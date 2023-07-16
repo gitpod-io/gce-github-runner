@@ -121,14 +121,6 @@ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /
 apt-get update
 apt-get install -y google-cloud-cli
 
-echo "📝 Install go..."
-GO_VERSION=1.20.5
-pushd /usr/local || exit 1
-curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs
-chown -R runner go
-ln -s $PWD/go/bin/go /usr/local/bin
-popd || exit 1
-
 echo "📝 Installing actions-runner..."
 RUNNER_TGZ=/tmp/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
 
