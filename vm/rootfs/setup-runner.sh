@@ -3,7 +3,7 @@
 set -e
 
 # go
-GO_VERSION=1.20.5
+GO_VERSION=1.20.6
 GOPATH=/home/runner/go-packages
 GOROOT=/home/runner/go
 PATH=$GOROOT/bin:$GOPATH/bin:$PATH
