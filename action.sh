@@ -156,8 +156,8 @@ EOF
 
 chmod +x /etc/systemd/system/shutdown.sh
 
-su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${VM_ID}-1 --labels ${VM_ID} --unattended ${ephemeral_flag} --disableupdate" runner
-su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${VM_ID}-2 --labels ${VM_ID} --unattended ${ephemeral_flag} --disableupdate" runner
+su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${VM_ID}-1 --labels ${VM_ID} --unattended --disableupdate" runner
+su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${VM_ID}-2 --labels ${VM_ID} --unattended --disableupdate" runner
 
 touch /.github-runner-config-ready
 
