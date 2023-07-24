@@ -32,8 +32,6 @@ image=
 image_family=
 scopes=
 shutdown_timeout=
-preemptible=
-ephemeral=
 
 OPTLIND=1
 while getopts_long :h opt \
@@ -51,8 +49,6 @@ while getopts_long :h opt \
 	image_family optional_argument \
 	scopes required_argument \
 	shutdown_timeout required_argument \
-	preemptible required_argument \
-	ephemeral required_argument \
 	help no_argument "" "$@"; do
 	case "$opt" in
 	command)
@@ -97,12 +93,6 @@ while getopts_long :h opt \
 	shutdown_timeout)
 		shutdown_timeout=$OPTLARG
 		;;
-	preemptible)
-		preemptible=$OPTLARG
-		;;
-	ephemeral)
-		ephemeral=$OPTLARG
-		;;
 	h | help)
 		usage
 		exit 0
@@ -129,8 +119,6 @@ function start_vm {
 	image_family_flag=$([[ -z "${image_family}" ]] || echo "--image-family=${image_family}")
 	disk_size_flag=$([[ -z "${disk_size}" ]] || echo "--boot-disk-size=${disk_size}")
 	boot_disk_type_flag=$([[ -z "${boot_disk_type}" ]] || echo "--boot-disk-type=${boot_disk_type}")
-	preemptible_flag=$([[ "${preemptible}" == "true" ]] && echo "--preemptible" || echo "")
-	ephemeral_flag=$([[ "${ephemeral}" == "true" ]] && echo "--ephemeral" || echo "")
 	project_id_flag=$(echo "--project=${project_id}")
 
 	echo "The new GCE VM will be ${VM_ID}"
@@ -216,7 +204,6 @@ FILE_EOF
 		${image_project_flag} \
 		${image_flag} \
 		${image_family_flag} \
-		${preemptible_flag} \
 		--maintenance-policy="TERMINATE" \
 		--metadata-from-file="startup-script=/tmp/startup-script.sh,shutdown-script=/tmp/shutdown-script.sh" &&
 		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
