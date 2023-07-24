@@ -9,7 +9,7 @@ ENV LEEWAY_BUILD_DIR=/var/tmp/build
 
 RUN cd /usr/bin && curl -fsSL https://github.com/gitpod-io/leeway/releases/download/v${LEEWAY_VERSION}/leeway_${LEEWAY_VERSION}_Linux_x86_64.tar.gz | sudo tar xz
 
-RUN cd /usr/bin && sudo curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linux_amd64 > yq \
+RUN cd /usr/bin && curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linux_amd64 | sudo tee -a yq >/dev/null 2>&1 \
     && sudo chmod +x yq
 
 ### Google Cloud ###
@@ -25,13 +25,15 @@ RUN sudo chown gitpod: /opt \
     # needed for access to our private registries
     && docker-credential-gcr configure-docker
 
-RUN sudo python3 -m pip uninstall crcmod; sudo python3 -m pip install --no-cache-dir -U crcmod
+RUN sudo install-packages python3-pip
 
-### gitpod-core specific gcloud config
-# Copy GCloud default config that points to gitpod-dev
-ARG GCLOUD_CONFIG_DIR=/home/gitpod/.config/gcloud
-COPY --chown=gitpod gcloud-default-config $GCLOUD_CONFIG_DIR/configurations/config_default
+RUN sudo python3 -m pip uninstall crcmod \
+    && sudo python3 -m pip install --no-cache-dir -U crcmod
 
 # Install pre-commit https://pre-commit.com/#install
 RUN sudo install-packages shellcheck \
     && sudo python3 -m pip install pre-commit
+
+RUN wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list \
+    && sudo install-packages packer
