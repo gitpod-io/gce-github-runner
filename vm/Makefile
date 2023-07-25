@@ -22,7 +22,7 @@ help:  ##     Display this help
 build-actions-runner-image: ##     Builds a custom GCP image for github self-hosted runners
 	packer build -force \
 		-var zone=europe-west1-b \
-		-var project_id=gitpod-core-dev \
+		-var project_id=public-github-runners \
 		-var source_image=ubuntu-2204-jammy-v20230630 \
 		-var image_name=gh-runner-${BUILD_ID} \
 		vm-image.pkr.hcl

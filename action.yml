@@ -14,7 +14,7 @@ inputs:
     description: >-
       ID of the Google Cloud Platform project. If provided, this will configure gcloud to use this project ID.
     required: false
-    default: gitpod-core-dev
+    default: public-github-runners
   machine_zone:
     description: GCE zone
     default: "europe-west1-b"
@@ -38,7 +38,7 @@ inputs:
   image:
     description: Specifies the name of the image that the disk will be initialized with.
     required: false
-    default: gh-runner-202307250800
+    default: gh-runner-202307250841
   image_family:
     description: The image family for the operating system that the boot disk will be initialized with.
     required: false
