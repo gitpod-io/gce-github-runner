@@ -29,6 +29,6 @@ jobs:
         run: |
           gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
       - id: create-runner
-        uses: gitpod-io/gce-github-runner@main
+        uses: gitpod-io/gce-github-runner@secrets
         with:
           token: ${{ secrets.GH_SELF_HOSTED_RUNNER_TOKEN }}
