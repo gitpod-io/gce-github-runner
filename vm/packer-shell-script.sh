@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-set -x
 
 pushd /tmp || exit 1
 echo "decompressing rootfs..."

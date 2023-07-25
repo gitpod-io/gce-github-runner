@@ -6,9 +6,12 @@ on:
       runner-label:
         type: string
         required: true
+      machine-zone:
+        type: string
+        required: true
 
     secrets:
-      GH_SELF_HOSTED_RUNNER_GCP_CREDENTIALS:
+      gcp_credentials:
         required: true
 
 jobs:
@@ -20,7 +23,7 @@ jobs:
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GH_SELF_HOSTED_RUNNER_GCP_CREDENTIALS }}
+          credentials_json: ${{ secrets.gcp_credentials }}
       - id: gcloud-auth
         name: gcloud auth activate-service-account
         shell: bash
@@ -35,4 +38,4 @@ jobs:
             exit 0
           fi
 
-          gcloud compute instances delete ${{ inputs.runner-label }} --quiet --zone ${{ inputs.machine_zone }}
+          gcloud compute instances delete ${{ inputs.runner-label }} --quiet --zone ${{ inputs.machine-zone }}
