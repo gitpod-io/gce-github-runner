@@ -35,4 +35,4 @@ jobs:
             exit 0
           fi
 
-          gcloud compute instances delete ${{ inputs.runner-label }} --quiet --zone ${{ inputs.runner-az }}
+          gcloud compute instances delete ${{ inputs.runner-label }} --quiet --zone ${{ inputs.machine_zone }}
