@@ -111,7 +111,7 @@ function start_vm {
 		exit 1
 	fi
 
-	echo "✅ Successfully got the GitHub Runner registration token $RUNNER_TOKEN"
+	echo "✅ Successfully got the GitHub Runner registration token"
 
 	VM_ID="gce-gh-runner-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 	image_project_flag=$([[ -z "${image_project}" ]] || echo "--image-project=${image_project}")
