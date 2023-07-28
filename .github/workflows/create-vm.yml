@@ -40,5 +40,5 @@ jobs:
         uses: gitpod-io/gce-github-runner@secrets
         with:
           runner_token: ${{ secrets.runner_token }}
-          default: ${{ inputs.default }}
+          task: ${{ inputs.task }}
 
