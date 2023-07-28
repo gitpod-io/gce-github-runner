@@ -168,6 +168,12 @@ echo "📝 Customizing the runner variables..."
 echo PATH=$PATH >>/${RUNNER_DIR}/.bashrc
 echo KUBEBUILDER_ASSETS=/usr/local/bin/k8s/1.26.1-linux-amd64 >>/${RUNNER_DIR}/.bashrc
 
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+apt update
+apt install gh -y
+
 cat <<-EOF >/actions-runner-1/wait-for-config.sh
 	#!/bin/bash
 	set -e
