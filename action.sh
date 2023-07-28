@@ -103,6 +103,8 @@ function start_vm {
 		# this can happen when we call the action from a reusable workflow.
 		# in these scenarios we don't want a new VM ;)
 		echo "Skipping creation of new VM. Using the existing one."
+		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
+		echo "machine-zone=${machine_zone}" >>"${GITHUB_OUTPUT}"
 		exit 0
 	fi
 
