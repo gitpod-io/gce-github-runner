@@ -96,7 +96,7 @@ while getopts_long :h opt \
 done
 
 function start_vm {
-	VM_ID="gce-gh-runner-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+	VM_ID="gce-gh-runner-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
 
 	if [ ! -z "$(gcloud compute instances list | grep "${VM_ID}")" ]; then
 		# the VM already exists.
