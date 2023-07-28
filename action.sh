@@ -96,13 +96,13 @@ while getopts_long :h opt \
 done
 
 function start_vm {
-	VM_ID="gce-gh-runner-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
+	VM_ID="runner-$(echo ${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}-${GITHUB_WORKFLOW_REF} | sha1sum | cut -f 1 -d " ")"
 
 	if [ ! -z "$(gcloud compute instances list | grep "${VM_ID}")" ]; then
 		# the VM already exists.
 		# this can happen when we call the action from a reusable workflow.
 		# in these scenarios we don't want a new VM ;)
-		echo "Skipping creation of new VM. Using the existing one."
+		echo "Skipping creation of new VM. Using the existing one (${VM_ID})"
 		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
 		echo "machine-zone=${machine_zone}" >>"${GITHUB_OUTPUT}"
 		exit 0
