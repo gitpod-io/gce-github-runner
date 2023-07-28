@@ -106,6 +106,16 @@ while getopts_long :h opt \
 done
 
 function start_vm {
+	VM_ID="gce-gh-runner-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+	if [ ! -z "$(gcloud compute instances list | grep "${VM_ID}")" ]; then
+		# the VM already exists.
+		# this can happen when we call the action from a reusable workflow.
+		# in these scenarios we don't want a new VM ;)
+		echo "Skipping creation of new VM. Using the existing one."
+		exit 0
+	fi
+
 	echo "Starting GCE VM ..."
 	RUNNER_TOKEN=$(curl -S -s -XPOST \
 		-H "authorization: Bearer ${token}" \
@@ -113,7 +123,6 @@ function start_vm {
 		jq -r .token)
 	echo "✅ Successfully got the GitHub Runner registration token"
 
-	VM_ID="gce-gh-runner-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 	image_project_flag=$([[ -z "${image_project}" ]] || echo "--image-project=${image_project}")
 	image_flag=$([[ -z "${image}" ]] || echo "--image=${image}")
 	image_family_flag=$([[ -z "${image_family}" ]] || echo "--image-family=${image_family}")
