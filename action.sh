@@ -30,6 +30,7 @@ image=
 image_family=
 scopes=
 shutdown_timeout=
+task=
 
 OPTLIND=1
 while getopts_long :h opt \
@@ -45,6 +46,7 @@ while getopts_long :h opt \
 	image_family optional_argument \
 	scopes required_argument \
 	shutdown_timeout required_argument \
+	task required_argument \
 	help no_argument "" "$@"; do
 	case "$opt" in
 	command)
@@ -82,6 +84,9 @@ while getopts_long :h opt \
 		;;
 	shutdown_timeout)
 		shutdown_timeout=$OPTLARG
+		;;
+	task)
+		task=$OPTLARG
 		;;
 	h | help)
 		usage

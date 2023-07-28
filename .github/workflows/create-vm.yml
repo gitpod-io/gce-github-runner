@@ -2,6 +2,11 @@ name: Create ephemeral GCE VM
 
 on:
   workflow_call:
+    inputs:
+      task:
+        type: string
+        required: false
+        default: "default"
     secrets:
       gcp_credentials:
         required: true
@@ -35,4 +40,5 @@ jobs:
         uses: gitpod-io/gce-github-runner@secrets
         with:
           runner_token: ${{ secrets.runner_token }}
+          default: ${{ inputs.default }}
 
