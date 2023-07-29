@@ -1,4 +1,4 @@
-name: Create ephemeral GCE VM
+name: Create GCE VM
 
 on:
   workflow_call:
@@ -20,6 +20,7 @@ on:
 
 jobs:
   run:
+    name: Create GCE VM
     runs-on: ubuntu-latest
     outputs:
       label: ${{ steps.create-runner.outputs.label }}
