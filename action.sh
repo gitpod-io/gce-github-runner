@@ -164,6 +164,12 @@ cleanup() {
 trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM
 
+cat <<-EOF >/etc/environment
+	PATH="/home/runner/go-packages/bin:/home/runner/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+	GOPATH="/home/runner/go-packages"
+	GOROOT="/home/runner/go"
+EOF
+
 # Create a systemd service in charge of shutting down the machine once the workflow has finished
 cat <<-EOF >/etc/systemd/system/shutdown.sh
 	#!/bin/sh
