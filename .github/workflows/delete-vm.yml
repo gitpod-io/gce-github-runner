@@ -17,7 +17,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    name: Cleanup
+    name: Delete ephemeral GCE VM
     steps:
       - id: auth
         name: Authenticate to Google Cloud
