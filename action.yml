@@ -83,8 +83,6 @@ runs:
       uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ inputs.gcp_credentials }}
-        export_environment_variables: true
-        cleanup_credentials: false
     - name: Activate GCP service account
       id: gcloud-auth
       if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name      
