@@ -139,11 +139,12 @@ function start_vm {
 
 	echo "The new GCE VM will be ${VM_ID}"
 
+	RUNNER_ID="${VM_ID}-$(date +%s)"
+
 	cat <<FILE_EOF >/tmp/startup-script.sh
 #!/bin/bash
 
 set -e
-set -x
 
 # leeway temporal directories
 chmod 777 /var/tmp
@@ -172,7 +173,6 @@ EOF
 
 chmod +x /etc/systemd/system/shutdown.sh
 
-RUNNER_ID=${VM_ID}-$(date +%s)
 su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-1 --labels ${VM_ID} --unattended --disableupdate" runner
 su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-2 --labels ${VM_ID} --unattended --disableupdate" runner
 
@@ -187,7 +187,6 @@ FILE_EOF
 #!/bin/bash
 
 set -e
-set -x
 
 pushd /actions-runner || exit 0
 

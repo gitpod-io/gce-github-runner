@@ -25,20 +25,23 @@ jobs:
       label: ${{ steps.create-runner.outputs.label }}
       machine-zone: ${{ steps.create-runner.outputs.machine-zone }}
     steps:
-      - uses: actions/checkout@v3
-      - id: auth
-        name: Authenticate to Google Cloud
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        id: auth
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name      
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.gcp_credentials }}
-      - id: gcloud-auth
-        name: gcloud auth activate-service-account
+      - name: Activate GCP service account
+        id: gcloud-auth
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name      
         shell: bash
         run: |
           gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
       - id: create-runner
-        uses: gitpod-io/gce-github-runner@secrets
+        uses: gitpod-io/gce-github-runner@delete-secrets
         with:
           runner_token: ${{ secrets.runner_token }}
-          task: ${{ inputs.task }}
-
+          task: ${{ inputs.task }}        
+          gcp_credentials: ${{ secrets.gcp_credentials }}

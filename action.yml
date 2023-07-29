@@ -68,49 +68,47 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: check-repository
+    - name: Check if we are allowed to run
+      id: check-repository
       if: github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
       shell: bash
       run: |
         echo "❌ Job actions are not allowed to run in forks" >> $GITHUB_STEP_SUMMARY
         exit 1
-    - uses: actions/checkout@v3
-    - id: auth
-      name: Authenticate to Google Cloud
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Authenticate to Google Cloud
+      id: auth
+      if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ inputs.gcp_credentials }}
-    - id: gcloud-auth
-      name: gcloud auth activate-service-account
+        export_environment_variables: true
+        cleanup_credentials: false
+    - name: Activate GCP service account
+      id: gcloud-auth
+      if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name      
       shell: bash
       run: |
         gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
-    - id: gce-github-runner-script
+    - name: Create GCE VM
+      id: gce-github-runner-script
       if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-      uses: pyTooling/Actions/with-post-step@r0
-      with:
-        main: |
-          ${{ github.action_path }}/action.sh
-          --command=start
-          --runner_token=${{ inputs.runner_token }}
-          --project_id=${{ inputs.project_id }}
-          --machine_zone=${{ inputs.machine_zone }}
-          --machine_type=${{ inputs.machine_type }}
-          --disk_size=${{ inputs.disk_size }}
-          --scopes=${{ inputs.scopes }}
-          --shutdown_timeout=${{ inputs.shutdown_timeout }}
-          --image_project=${{ inputs.image_project }}
-          --image=${{ inputs.image }}
-          --image_family=${{ inputs.image_family }}
-          --boot_disk_type=pd-ssd
+      shell: bash
+      run: |
+        set -x
+
+        ${{ github.action_path }}/action.sh \
+          --command=start \
+          --runner_token=${{ inputs.runner_token }} \
+          --project_id=${{ inputs.project_id }} \
+          --machine_zone=${{ inputs.machine_zone }} \
+          --machine_type=${{ inputs.machine_type }} \
+          --disk_size=${{ inputs.disk_size }} \
+          --scopes=${{ inputs.scopes }} \
+          --shutdown_timeout=${{ inputs.shutdown_timeout }} \
+          --image_project=${{ inputs.image_project }} \
+          --image=${{ inputs.image }} \
+          --image_family=${{ inputs.image_family }} \
+          --boot_disk_type=pd-ssd \
           --task=${{ inputs.task }}
-        post: |
-          echo "Removing GCE VM..."
-
-          gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
-          if [ -z "$(gcloud compute instances list | grep "${{ inputs.runner-label }}")" ]; then
-            # vm is gone
-            exit 0
-          fi
-
-          gcloud compute instances delete ${{ inputs.runner-label }} --quiet --zone ${{ inputs.machine-zone }}
