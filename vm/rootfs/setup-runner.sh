@@ -26,7 +26,9 @@ go install -v github.com/uudashr/gopkgs/cmd/gopkgs@v2 \
 	&& go install -v sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
 # Install kubebuilder
-sudo $(which setup-envtest) use 1.26.1 --bin-dir /usr/local/bin/
+KUBEBUIDER_VERSION=1.26.1
+sudo $(which setup-envtest) use "${KUBEBUIDER_VERSION}" --bin-dir /usr/local/bin/
+sudo cp /usr/local/bin/k8s/${KUBEBUIDER_VERSION}-linux-amd64/* /usr/local/bin/
 
 # Pull required images
 readonly PRELOAD_FILE="/etc/preloaded-images"

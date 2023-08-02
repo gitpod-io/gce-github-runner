@@ -508,7 +508,6 @@ test_getopts_long() {
 }
 while IFS= read -r c && IFS= read -r e; do
   printf '+ %-72s ' "$c"
-  #set -x
   eval "test_getopts_long \"\$e\" $c"
 done << \EOF
 : a

@@ -19,49 +19,44 @@ function safety_off {
 source "${ACTION_DIR}/vendor/getopts_long.sh"
 
 command=
-token=
+runner_token=
 project_id=
-runner_ver=
 machine_zone=
 machine_type=
 boot_disk_type=
 disk_size=
-runner_service_account=
 image_project=
 image=
 image_family=
 scopes=
 shutdown_timeout=
+task=
 
 OPTLIND=1
 while getopts_long :h opt \
 	command required_argument \
-	token required_argument \
+	runner_token required_argument \
 	project_id required_argument \
-	runner_ver required_argument \
 	machine_zone required_argument \
 	machine_type required_argument \
 	boot_disk_type optional_argument \
 	disk_size optional_argument \
-	runner_service_account optional_argument \
 	image_project optional_argument \
 	image optional_argument \
 	image_family optional_argument \
 	scopes required_argument \
 	shutdown_timeout required_argument \
+	task required_argument \
 	help no_argument "" "$@"; do
 	case "$opt" in
 	command)
 		command=$OPTLARG
 		;;
-	token)
-		token=$OPTLARG
+	runner_token)
+		runner_token=$OPTLARG
 		;;
 	project_id)
 		project_id=$OPTLARG
-		;;
-	runner_ver)
-		runner_ver=$OPTLARG
 		;;
 	machine_zone)
 		machine_zone=$OPTLARG
@@ -74,9 +69,6 @@ while getopts_long :h opt \
 		;;
 	disk_size)
 		disk_size=${OPTLARG-$disk_size}
-		;;
-	runner_service_account)
-		runner_service_account=${OPTLARG-$runner_service_account}
 		;;
 	image_project)
 		image_project=${OPTLARG-$image_project}
@@ -93,6 +85,9 @@ while getopts_long :h opt \
 	shutdown_timeout)
 		shutdown_timeout=$OPTLARG
 		;;
+	task)
+		task=$OPTLARG
+		;;
 	h | help)
 		usage
 		exit 0
@@ -106,21 +101,33 @@ while getopts_long :h opt \
 done
 
 function start_vm {
-	VM_ID="gce-gh-runner-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+	VM_ID="runner-$(echo ${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}-${task} | sha1sum | cut -f 1 -d " ")"
 
 	if [ ! -z "$(gcloud compute instances list | grep "${VM_ID}")" ]; then
 		# the VM already exists.
 		# this can happen when we call the action from a reusable workflow.
 		# in these scenarios we don't want a new VM ;)
-		echo "Skipping creation of new VM. Using the existing one."
+		echo "Skipping creation of new VM. Using the existing one (${VM_ID})"
+		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
+		echo "machine-zone=${machine_zone}" >>"${GITHUB_OUTPUT}"
 		exit 0
 	fi
 
 	echo "Starting GCE VM ..."
+	if [ -z "$runner_token" ]; then 
+		echo "❌ runner_token parameter is required"
+		exit 1
+	fi
+
 	RUNNER_TOKEN=$(curl -S -s -XPOST \
-		-H "authorization: Bearer ${token}" \
-		"https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runners/registration-token" |
+		-H "Authorization: Bearer $runner_token" \
+		"https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runners/registration-token" |
 		jq -r .token)
+	if [ -z "$RUNNER_TOKEN" ]; then 
+		echo "❌ Failed to get a registration token"
+		exit 1
+	fi
+
 	echo "✅ Successfully got the GitHub Runner registration token"
 
 	image_project_flag=$([[ -z "${image_project}" ]] || echo "--image-project=${image_project}")
@@ -132,11 +139,12 @@ function start_vm {
 
 	echo "The new GCE VM will be ${VM_ID}"
 
+	RUNNER_ID="${VM_ID}-$(date +%s)"
+
 	cat <<FILE_EOF >/tmp/startup-script.sh
 #!/bin/bash
 
 set -e
-set -x
 
 # leeway temporal directories
 chmod 777 /var/tmp
@@ -156,6 +164,12 @@ cleanup() {
 trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM
 
+cat <<-EOF >/etc/environment
+	PATH="/home/runner/go-packages/bin:/home/runner/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+	GOPATH="/home/runner/go-packages"
+	GOROOT="/home/runner/go"
+EOF
+
 # Create a systemd service in charge of shutting down the machine once the workflow has finished
 cat <<-EOF >/etc/systemd/system/shutdown.sh
 	#!/bin/sh
@@ -165,7 +179,6 @@ EOF
 
 chmod +x /etc/systemd/system/shutdown.sh
 
-RUNNER_ID=${VM_ID}-$(date +%s)
 su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-1 --labels ${VM_ID} --unattended --disableupdate" runner
 su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-2 --labels ${VM_ID} --unattended --disableupdate" runner
 
@@ -180,7 +193,6 @@ FILE_EOF
 #!/bin/bash
 
 set -e
-set -x
 
 pushd /actions-runner || exit 0
 
@@ -191,7 +203,7 @@ REMOVE_TOKEN=\$(curl \
 	-H "Authorization: Bearer ${RUNNER_TOKEN}" \
 	https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runners/remove-token | jq .token --raw-output)
 if [ -z "\$REMOVE_TOKEN" ]; then 
-	echo "Failed to get a removal token"
+	echo "❌ Failed to get a removal token"
 	exit 0
 fi 
 
@@ -217,8 +229,10 @@ FILE_EOF
 		--maintenance-policy="TERMINATE" \
 		--metadata-from-file="startup-script=/tmp/startup-script.sh,shutdown-script=/tmp/shutdown-script.sh" &&
 		echo "label=${VM_ID}" >>"${GITHUB_OUTPUT}"
+		echo "machine-zone=${machine_zone}" >>"${GITHUB_OUTPUT}"
 
 	safety_off
+	set +x
 	while ((i++ < 60)); do
 		GH_READY=$(gcloud compute instances describe "${VM_ID}" --zone="${machine_zone}" --format='json(labels)' | jq -r .labels.gh_ready)
 		if [[ $GH_READY == 1 ]]; then
@@ -230,7 +244,7 @@ FILE_EOF
 	if [[ $GH_READY == 1 ]]; then
 		echo "✅ ${VM_ID} ready ..."
 	else
-		echo "Waited 5 minutes for ${VM_ID}, without luck, deleting ${VM_ID} ..."
+		echo "❌ Waited 5 minutes for ${VM_ID}, without luck, deleting ${VM_ID} ..."
 		gcloud --quiet compute instances delete "${VM_ID}" --zone="${machine_zone}"
 		exit 1
 	fi

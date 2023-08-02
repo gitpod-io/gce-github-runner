@@ -1,34 +1,48 @@
-name: Create ephemeral GCE VM
+name: Create GCE VM
 
 on:
   workflow_call:
+    inputs:
+      task:
+        type: string
+        required: false
+        default: "default"
     secrets:
-      GCP_CREDENTIALS:
+      gcp_credentials:
         required: true
-      GH_SELF_HOSTED_RUNNER:
+      runner_token:
         required: true
     outputs:
       label:
         value: ${{ jobs.run.outputs.label }}
+      machine-zone:
+        value: ${{ jobs.run.outputs.machine-zone }}
 
 jobs:
   run:
+    name: Create GCE VM
     runs-on: ubuntu-latest
     outputs:
       label: ${{ steps.create-runner.outputs.label }}
+      machine-zone: ${{ steps.create-runner.outputs.machine-zone }}
     steps:
-      - uses: actions/checkout@v3
-      - id: auth
-        name: Authenticate to Google Cloud
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        id: auth
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name      
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      - id: gcloud-auth
-        name: gcloud auth activate-service-account
+          credentials_json: ${{ secrets.gcp_credentials }}
+      - name: Activate GCP service account
+        id: gcloud-auth
+        if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name      
         shell: bash
         run: |
           gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
       - id: create-runner
-        uses: gitpod-io/gce-github-runner@main
+        uses: gitpod-io/gce-github-runner@delete-secrets
         with:
-          token: ${{ secrets.GH_SELF_HOSTED_RUNNER }}
+          runner_token: ${{ secrets.runner_token }}
+          task: ${{ inputs.task }}        
+          gcp_credentials: ${{ secrets.gcp_credentials }}
