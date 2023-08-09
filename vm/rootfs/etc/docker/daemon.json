@@ -2,7 +2,7 @@
     "mtu": 1440,
     "builder": {
         "gc": {
-            "defaultKeepStorage": "20GB",
+            "defaultKeepStorage": "10GB",
             "enabled": true
         }
     },

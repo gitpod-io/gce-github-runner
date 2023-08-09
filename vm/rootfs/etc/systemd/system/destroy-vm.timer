@@ -2,7 +2,7 @@
 Description="Run destroy-vm.service 1d after boot relative to activation time"
 
 [Timer]
-OnBootSec=2h
+OnBootSec=4h
 Unit=destroy-vm.service
 
 [Install]
