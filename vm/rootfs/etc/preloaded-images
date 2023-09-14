@@ -1,7 +1,9 @@
 eu.gcr.io/gitpod-core-dev/dev/dev-environment:at-node-18-17-1-gha.15610
-eu.gcr.io/gitpod-core-dev/dev/dev-environment:aledbf-oci-tool-gha.14121
 gitpod/workspace-full
 mysql:5.7
+bitnami/mysql:8.0.33-debian-11-r24
+redis
 node:16
+node:18
 localstack/localstack:2.2
 registry:2
