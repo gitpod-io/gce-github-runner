@@ -45,7 +45,7 @@ inputs:
     required: true
   shutdown_timeout:
     description: "Shutdown grace period (in seconds)."
-    default: 30
+    default: 30s
     required: true
   task:
     description: Additional context about the workflow
@@ -76,7 +76,7 @@ runs:
         echo "❌ Job actions are not allowed to run in forks" >> $GITHUB_STEP_SUMMARY
         exit 1
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Authenticate to Google Cloud
       id: auth
       if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
