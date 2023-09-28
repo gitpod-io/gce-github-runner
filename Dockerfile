@@ -9,7 +9,7 @@ ENV LEEWAY_BUILD_DIR=/var/tmp/build
 
 RUN cd /usr/bin && curl -fsSL https://github.com/gitpod-io/leeway/releases/download/v${LEEWAY_VERSION}/leeway_${LEEWAY_VERSION}_Linux_x86_64.tar.gz | sudo tar xz
 
-RUN cd /usr/bin && curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.35.1/yq_linux_amd64 | sudo tee -a yq >/dev/null 2>&1 \
+RUN cd /usr/bin && curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_linux_amd64 | sudo tee -a yq >/dev/null 2>&1 \
     && sudo chmod +x yq
 
 ### Google Cloud ###
