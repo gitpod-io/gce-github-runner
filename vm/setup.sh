@@ -108,7 +108,7 @@ curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o - | t
 cp /tmp/helm /usr/local/bin/helm
 
 echo "📝 Installing yq (YAML processor)..."
-curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.22.1/yq_linux_amd64 -o /usr/local/bin/yq
+curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_linux_amd64 -o /usr/local/bin/yq
 chmod +x /usr/local/bin/yq
 
 echo "📝 Installing oci-tool..."
