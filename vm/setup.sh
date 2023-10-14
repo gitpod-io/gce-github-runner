@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 RUNNER_USER="runner"
 RUNNER_DIR="/home/${RUNNER_USER}"
-RUNNER_VER=2.309.0
+RUNNER_VER=2.310.2
 
 HELM_VERSION=3.12.1
 
@@ -147,7 +147,7 @@ echo "📝 Installing leeway..."
 LEEWAY_MAX_PROVENANCE_BUNDLE_SIZE=8388608
 LEEWAY_CACHE_DIR=/var/tmp/cache
 LEEWAY_BUILD_DIR=/var/tmp/build
-LEEWAY_VERSION="0.7.6"
+LEEWAY_VERSION="0.7.9"
 
 mkdir -p "${LEEWAY_CACHE_DIR}" "${LEEWAY_BUILD_DIR}"
 chmod 777 -R /var/tmp/
