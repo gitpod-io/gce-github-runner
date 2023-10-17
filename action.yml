@@ -35,7 +35,7 @@ inputs:
   image:
     description: Specifies the name of the image that the disk will be initialized with.
     required: false
-    default: gh-runner-202310171138
+    default: gh-runner-202310171159
   image_family:
     description: The image family for the operating system that the boot disk will be initialized with.
     required: false
@@ -85,7 +85,7 @@ runs:
         credentials_json: ${{ inputs.gcp_credentials }}
     - name: Activate GCP service account
       id: gcloud-auth
-      if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name      
+      if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       shell: bash
       run: |
         gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
