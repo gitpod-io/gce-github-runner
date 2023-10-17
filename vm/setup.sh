@@ -270,4 +270,6 @@ rm -rf /var/log/journal/*
 journalctl --rotate
 journalctl --vacuum-time=1s
 
+echo "tmpfs   /tmp         tmpfs   rw,nodev,nosuid,relatime          0  0" >> /etc/fstab
+
 echo "done."
