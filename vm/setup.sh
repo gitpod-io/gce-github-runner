@@ -9,6 +9,7 @@ RUNNER_DIR="/home/${RUNNER_USER}"
 RUNNER_VER=2.310.2
 
 HELM_VERSION=3.12.1
+PULUMI_VERSION=3.89.0
 
 DOCKER_USER_UID=33333
 DOCKER_GROUP_GID=33333
@@ -120,6 +121,10 @@ echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.clou
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 apt-get update
 apt-get install -y google-cloud-cli
+
+echo "📝 Installing pulumi..."
+curl -fsSL https://get.pulumi.com/releases/sdk/pulumi-v${PULUMI_VERSION}-linux-x64.tar.gz | tar -xzvC /tmp/ --strip-components=1
+cp /tmp/pulumi /usr/local/bin/pulumi
 
 echo "📝 Installing actions-runner..."
 RUNNER_TGZ=/tmp/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
