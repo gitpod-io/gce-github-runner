@@ -124,7 +124,7 @@ apt-get install -y google-cloud-cli
 
 echo "📝 Installing pulumi..."
 curl -fsSL https://get.pulumi.com/releases/sdk/pulumi-v${PULUMI_VERSION}-linux-x64.tar.gz | tar -xzvC /tmp/ --strip-components=1
-cp /tmp/pulumi /usr/local/bin/pulumi
+cp /tmp/pulumi* /usr/local/bin/
 
 echo "📝 Installing actions-runner..."
 RUNNER_TGZ=/tmp/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
