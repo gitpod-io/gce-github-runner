@@ -28,6 +28,7 @@ disk_size=
 image_project=
 image=
 image_family=
+label=
 scopes=
 shutdown_timeout=
 task=
@@ -44,6 +45,7 @@ while getopts_long :h opt \
 	image_project optional_argument \
 	image optional_argument \
 	image_family optional_argument \
+	label optional_argument \
 	scopes required_argument \
 	shutdown_timeout required_argument \
 	task required_argument \
@@ -79,6 +81,9 @@ while getopts_long :h opt \
 	image_family)
 		image_family=${OPTLARG-$image_family}
 		;;
+	label)
+		label=${OPTLARG-$label}
+		;;
 	scopes)
 		scopes=$OPTLARG
 		;;
@@ -102,6 +107,10 @@ done
 
 function start_vm {
 	VM_ID="runner-$(echo ${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}-${task} | sha1sum | cut -f 1 -d " ")"
+	if [ ! -z "${label}" ]; then
+		echo "Label provided, using it as VM ID (${label})"
+		VM_ID="${label}"
+	fi
 
 	if [ ! -z "$(gcloud compute instances list | grep "${VM_ID}")" ]; then
 		# the VM already exists.
@@ -114,7 +123,7 @@ function start_vm {
 	fi
 
 	echo "Starting GCE VM ..."
-	if [ -z "$runner_token" ]; then 
+	if [ -z "$runner_token" ]; then
 		echo "❌ runner_token parameter is required"
 		exit 1
 	fi
@@ -123,7 +132,7 @@ function start_vm {
 		-H "Authorization: Bearer $runner_token" \
 		"https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runners/registration-token" |
 		jq -r .token)
-	if [ -z "$RUNNER_TOKEN" ]; then 
+	if [ -z "$RUNNER_TOKEN" ]; then
 		echo "❌ Failed to get a registration token"
 		exit 1
 	fi
@@ -202,10 +211,10 @@ REMOVE_TOKEN=\$(curl \
 	-H "Accept: application/vnd.github+json" \
 	-H "Authorization: Bearer ${RUNNER_TOKEN}" \
 	https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runners/remove-token | jq .token --raw-output)
-if [ -z "\$REMOVE_TOKEN" ]; then 
+if [ -z "\$REMOVE_TOKEN" ]; then
 	echo "❌ Failed to get a removal token"
 	exit 0
-fi 
+fi
 
 su -s /bin/bash -c "cd /actions-runner/;/actions-runner-1/config.sh remove --token \${REMOVE_TOKEN}" runner
 su -s /bin/bash -c "cd /actions-runner/;/actions-runner-2/config.sh remove --token \${REMOVE_TOKEN}" runner
