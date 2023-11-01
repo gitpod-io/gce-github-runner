@@ -47,8 +47,9 @@ jobs:
         run: |
           gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
       - id: create-runner
-        uses: gitpod-io/gce-github-runner@main
+        uses: gitpod-io/gce-github-runner@${{ github.sha }}
         with:
           runner_token: ${{ secrets.runner_token }}
           task: ${{ inputs.task }}
+          label: ${{ inputs.label }}
           gcp_credentials: ${{ secrets.gcp_credentials }}
