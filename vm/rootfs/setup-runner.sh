@@ -3,6 +3,12 @@
 set -e
 
 # go
+#
+# If you're updating this version, please also update the version in
+# gitpod-io/gitpod-dedicated as well as this ensures that we use the
+# same Go version during development as we do in CI - which allows us to
+# reuse the leeway cache
+#
 GO_VERSION=1.21.4
 GOPATH=/home/runner/go-packages
 GOROOT=/home/runner/go
