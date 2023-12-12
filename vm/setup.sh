@@ -152,7 +152,7 @@ echo "📝 Installing leeway..."
 LEEWAY_MAX_PROVENANCE_BUNDLE_SIZE=8388608
 LEEWAY_CACHE_DIR=/var/tmp/cache
 LEEWAY_BUILD_DIR=/var/tmp/build
-LEEWAY_VERSION="0.8.0"
+LEEWAY_VERSION="0.8.1"
 
 mkdir -p "${LEEWAY_CACHE_DIR}" "${LEEWAY_BUILD_DIR}"
 chmod 777 -R /var/tmp/

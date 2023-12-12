@@ -2,7 +2,7 @@
 FROM eu.gcr.io/gitpod-core-dev/dev/dev-environment:base
 
 # leeway
-ARG LEEWAY_VERSION=0.7.9
+ARG LEEWAY_VERSION=0.8.1
 ENV LEEWAY_MAX_PROVENANCE_BUNDLE_SIZE=8388608
 ENV LEEWAY_CACHE_DIR=/var/tmp/cache
 ENV LEEWAY_BUILD_DIR=/var/tmp/build
