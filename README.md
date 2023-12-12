@@ -2,6 +2,8 @@
 
 Ephemeral GCE GitHub self-hosted runner based on https://github.com/related-sciences/gce-github-runner
 
+For more context see [Running Github runners in GCE VMs](https://www.notion.so/gitpod/Running-Github-runners-in-GCE-VMs-6ccd9c876abb4061b62671548279bca7)
+
 ## Usage
 
 ```yaml
