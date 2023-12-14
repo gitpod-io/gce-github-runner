@@ -203,8 +203,6 @@ FILE_EOF
 
 set -e
 
-pushd /actions-runner || exit 0
-
 echo "Removing runner..."
 REMOVE_TOKEN=\$(curl \
 	-X POST \
