@@ -203,8 +203,6 @@ FILE_EOF
 
 set -e
 
-pushd /actions-runner || exit 0
-
 echo "Removing runner..."
 REMOVE_TOKEN=\$(curl \
 	-X POST \
@@ -216,8 +214,8 @@ if [ -z "\$REMOVE_TOKEN" ]; then
 	exit 0
 fi
 
-su -s /bin/bash -c "cd /actions-runner/;/actions-runner-1/config.sh remove --token \${REMOVE_TOKEN}" runner
-su -s /bin/bash -c "cd /actions-runner/;/actions-runner-2/config.sh remove --token \${REMOVE_TOKEN}" runner
+su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh remove --token \${REMOVE_TOKEN}" runner
+su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh remove --token \${REMOVE_TOKEN}" runner
 
 FILE_EOF
 
