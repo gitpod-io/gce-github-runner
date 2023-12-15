@@ -173,6 +173,12 @@ cleanup() {
 trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM
 
+on_error() {
+  echo "Error on line \$(caller)"
+}
+
+trap on_error ERR
+
 cat <<-EOF >/etc/environment
 	PATH="/home/runner/go-packages/bin:/home/runner/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 	GOPATH="/home/runner/go-packages"
@@ -188,6 +194,7 @@ EOF
 
 chmod +x /etc/systemd/system/shutdown.sh
 
+echo "Registering runners ${RUNNER_ID}-1 and ${RUNNER_ID}-2..."
 su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-1 --labels ${VM_ID} --unattended --disableupdate" runner
 su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-2 --labels ${VM_ID} --unattended --disableupdate" runner
 
@@ -203,19 +210,21 @@ FILE_EOF
 
 set -e
 
-echo "Removing runner..."
-REMOVE_TOKEN=\$(curl \
-	-X POST \
-	-H "Accept: application/vnd.github+json" \
-	-H "Authorization: Bearer ${RUNNER_TOKEN}" \
-	https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runners/remove-token | jq .token --raw-output)
-if [ -z "\$REMOVE_TOKEN" ]; then
-	echo "❌ Failed to get a removal token"
-	exit 0
-fi
+on_error() {
+  echo "Error on line \$(caller)"
+}
 
-su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh remove --token \${REMOVE_TOKEN}" runner
-su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh remove --token \${REMOVE_TOKEN}" runner
+trap on_error ERR
+
+echo "Removing runners ${RUNNER_ID}-1 and ${RUNNER_ID}-2..."
+
+cd /actions-runner-1/
+su -s /bin/bash -c "/actions-runner-1/config.sh remove --token ${RUNNER_TOKEN}" runner
+
+cd /actions-runner-2/
+su -s /bin/bash -c "/actions-runner-2/config.sh remove --token ${RUNNER_TOKEN}" runner
+
+echo "Removed runners"
 
 FILE_EOF
 
