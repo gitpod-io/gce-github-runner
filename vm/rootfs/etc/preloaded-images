@@ -1,9 +1,11 @@
 eu.gcr.io/gitpod-core-dev/dev/dev-environment:se-update-leeway-gha.20594
+eu.gcr.io/gitpod-core-dev/dev/dev-environment:at-user-getauthenticated-dashboard-gha.20954
 gitpod/workspace-full
 mysql:8.0.33
 bitnami/mysql:8.0.33-debian-11-r24
 redis
 node:16
 node:18
+node:20
 localstack/localstack:2.2
 registry:2
