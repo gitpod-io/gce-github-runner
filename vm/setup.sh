@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 RUNNER_USER="runner"
 RUNNER_DIR="/home/${RUNNER_USER}"
-RUNNER_VER=2.314.1
+RUNNER_VER=2.315.0
 
 HELM_VERSION=3.12.1
 PULUMI_VERSION=3.89.0
@@ -14,9 +14,9 @@ PULUMI_VERSION=3.89.0
 DOCKER_USER_UID=33333
 DOCKER_GROUP_GID=33333
 
-DOCKER_VERSION=25.0.2
-DOCKER_COMPOSE_VERSION=v2.24.6
-DOCKER_BUILDX_VERSION=0.12.1
+DOCKER_VERSION=26.0.0
+DOCKER_COMPOSE_VERSION=v2.26.0
+DOCKER_BUILDX_VERSION=0.13.1
 
 echo "📝 Preparing environment for docker..."
 # Only install containerd from docker.io repository to be in control of the docker services.
