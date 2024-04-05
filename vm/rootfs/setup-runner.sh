@@ -9,7 +9,7 @@ set -e
 # same Go version during development as we do in CI - which allows us to
 # reuse the leeway cache
 #
-GO_VERSION=1.22.1
+GO_VERSION=1.22.2
 GOPATH=/home/runner/go-packages
 GOROOT=/home/runner/go
 PATH=$GOROOT/bin:$GOPATH/bin:$PATH
