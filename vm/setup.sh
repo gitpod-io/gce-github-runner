@@ -6,17 +6,17 @@ export DEBIAN_FRONTEND=noninteractive
 
 RUNNER_USER="runner"
 RUNNER_DIR="/home/${RUNNER_USER}"
-RUNNER_VER=2.315.0
+RUNNER_VER=2.316.0
 
-HELM_VERSION=3.12.1
-PULUMI_VERSION=3.89.0
+HELM_VERSION=3.14.0
+PULUMI_VERSION=3.114.0
 
 DOCKER_USER_UID=33333
 DOCKER_GROUP_GID=33333
 
 DOCKER_VERSION=26.0.0
 DOCKER_COMPOSE_VERSION=v2.26.0
-DOCKER_BUILDX_VERSION=0.13.1
+DOCKER_BUILDX_VERSION=0.14.0
 
 echo "📝 Preparing environment for docker..."
 # Only install containerd from docker.io repository to be in control of the docker services.
@@ -126,6 +126,17 @@ echo "📝 Installing pulumi..."
 curl -fsSL https://get.pulumi.com/releases/sdk/pulumi-v${PULUMI_VERSION}-linux-x64.tar.gz | tar -xzvC /tmp/ --strip-components=1
 cp /tmp/pulumi* /usr/local/bin/
 
+echo "Installing node.js..."
+export NODE_MAJOR=20
+apt install -y ca-certificates curl gnupg && \
+    mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list && \
+    apt-install -y nodejs && \
+    npm install -g @devcontainers/cli && \
+    rm -rf /usr/include/node/openssl/archs/{aix64-gcc-as,BSD-x86,BSD-x86_64,darwin64-arm64-cc,darwin64-x86_64-cc,darwin-i386-cc,linux32-s390x,linux64-loongarch64,linux64-mips64,linux64-riscv64,linux64-s390x,linux-armv4,linux-ppc64le,solaris64-x86_64-gcc,solaris-x86-gcc,VC-WIN32} && \
+    rm -rf /usr/share/doc/nodejs
+
 echo "📝 Installing actions-runner..."
 RUNNER_TGZ=/tmp/actions-runner-linux-x64-${RUNNER_VER}.tar.gz
 
@@ -232,26 +243,35 @@ apt-get autoremove --assume-yes --quiet
 # Disable services that can impact the VM during start. This is discouraged in everyday
 # situations, but by using the cluster autoscaler the node rotation removes any benefit.
 SERVICES_TO_DISABLE=(
-	apt-daily-upgrade.timer
-	apt-daily.timer
+	secureboot-db.service
+	apport-autoreport.service
+	apport.service
 	apt-daily-upgrade.service
+	apt-daily-upgrade.timer
 	apt-daily.service
-	man-db.timer
+	apt-daily.timer
+	atop.service
+	atopacct.service
+	bluetooth.target
+	console-setup.service
+	e2scrub_reap.service
+	fstrim.service
+	keyboard-setup
 	man-db.service
-	crond.service
+	man-db.timer
 	motd-news.service
 	motd-news.timer
-	unattended-upgrades.service
-	apport.service
-	apport-autoreport.service
-	bluetooth.target
+	netplan-ovs-cleanup.service
+	systemd-journal-flush
+	systemd-pcrphase.service
+	systemd-udev-settle.service
 	ua-messaging.service
 	ua-messaging.timer
-	ua-timer.timer
+	ua-reboot-cmds.service
 	ua-timer.service
+	ua-timer.timer
 	ubuntu-advantage.service
-	secureboot-db.service
-	atop.service
+	unattended-upgrades.service
 )
 # shellcheck disable=SC2048
 for SERVICE in ${SERVICES_TO_DISABLE[*]}; do
