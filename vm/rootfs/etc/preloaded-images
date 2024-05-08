@@ -1,9 +1,13 @@
 eu.gcr.io/gitpod-core-dev/dev/dev-environment:pd-test-new-preview-gha.24525
-eu.gcr.io/gitpod-core-dev/dev/dev-environment:aledbf-go-122-gha.23879
+public.ecr.aws/k5t9d3j5/gitpod-next/dev-environment:cw-1715107995b
 gitpod/workspace-full
 mysql:8.0.33
 bitnami/mysql:8.0.33-debian-11-r24
 redis
 node:20
 localstack/localstack:3.0.0
+localstack/localstack:3.4.0
 registry:2
+postgres:15.3-alpine
+redis:7.2.4-alpine
+

@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 RUNNER_USER="runner"
 RUNNER_DIR="/home/${RUNNER_USER}"
-RUNNER_VER=2.316.0
+RUNNER_VER=2.316.1
 
 HELM_VERSION=3.14.0
 PULUMI_VERSION=3.114.0
@@ -14,7 +14,7 @@ PULUMI_VERSION=3.114.0
 DOCKER_USER_UID=33333
 DOCKER_GROUP_GID=33333
 
-DOCKER_VERSION=26.0.0
+DOCKER_VERSION=26.1.1
 DOCKER_COMPOSE_VERSION=v2.26.0
 DOCKER_BUILDX_VERSION=0.14.0
 
@@ -163,7 +163,7 @@ echo "📝 Installing leeway..."
 LEEWAY_MAX_PROVENANCE_BUNDLE_SIZE=8388608
 LEEWAY_CACHE_DIR=/var/tmp/cache
 LEEWAY_BUILD_DIR=/var/tmp/build
-LEEWAY_VERSION="0.8.1"
+LEEWAY_VERSION="0.8.3"
 
 mkdir -p "${LEEWAY_CACHE_DIR}" "${LEEWAY_BUILD_DIR}"
 chmod 777 -R /var/tmp/
@@ -244,35 +244,44 @@ apt-get autoremove --assume-yes --quiet
 # situations, but by using the cluster autoscaler the node rotation removes any benefit.
 SERVICES_TO_DISABLE=(
 	secureboot-db.service
-	apport-autoreport.service
-	apport.service
-	apt-daily-upgrade.service
-	apt-daily-upgrade.timer
-	apt-daily.service
-	apt-daily.timer
-	atop.service
-	atopacct.service
-	bluetooth.target
-	console-setup.service
-	e2scrub_reap.service
-	fstrim.service
-	keyboard-setup
-	man-db.service
-	man-db.timer
-	motd-news.service
-	motd-news.timer
-	netplan-ovs-cleanup.service
-	systemd-journal-flush
-	systemd-pcrphase.service
-	systemd-udev-settle.service
-	ua-messaging.service
-	ua-messaging.timer
-	ua-reboot-cmds.service
-	ua-timer.service
-	ua-timer.timer
-	ubuntu-advantage.service
-	unattended-upgrades.service
+    apport-autoreport.service
+    apport.service
+    apt-daily-upgrade.service
+    apt-daily-upgrade.timer
+    apt-daily.service
+    apt-daily.timer
+    atop.service
+    atopacct.service
+    autofs.service
+    bluetooth.target
+    console-setup.service
+    crond.service
+    e2scrub_reap.service
+    fstrim.service
+    keyboard-setup
+    man-db.service
+    man-db.timer
+    motd-news.service
+    motd-news.timer
+    netplan-ovs-cleanup.service
+    syslog.service
+    systemd-journal-flush.service
+    systemd-pcrphase.service
+    ua-messaging.service
+    ua-messaging.timer
+    ua-reboot-cmds.service
+    ua-timer.service
+    ua-timer.timer
+    ubuntu-advantage.service
+    unattended-upgrades.service
+    vgauth.service
+    open-vm-tools.service
+    wpa_supplicant.service
+    lvm2-monitor.service
+    ModemManager.service
+    systemd-udev-settle.service
 )
+
 # shellcheck disable=SC2048
 for SERVICE in ${SERVICES_TO_DISABLE[*]}; do
 	systemctl stop "${SERVICE}" || true
@@ -287,6 +296,10 @@ rm -rf /tmp/*
 
 echo "📝 disabling the first boot fsck check..."
 sed -i 's/GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="fsck.mode=skip \1"/g' /etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="quiet loglevel=3 systemd.show_status=false rd.udev.log_level=3 libahci.ignore_sss=1 \1"/g' /etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="audit=0 \1"/g' /etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="rd.lvm=0 rd.luks=0 rd.md=0 rd.dm=0 rd.multipath=0 rd.iscsi=0 rd.plymouth=0 rd.udev.log_priority=3 raid=noautodetect udev.children-max=255 rd.udev.children-max=255 rd.plymouth=0 plymouth.enable=0 \1"/g' /etc/default/grub
+
 update-grub
 touch /fastboot
 
@@ -296,5 +309,7 @@ journalctl --rotate
 journalctl --vacuum-time=1s
 
 echo "tmpfs   /tmp         tmpfs   rw,nodev,nosuid,relatime          0  0" >> /etc/fstab
+
+update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 echo "done."
