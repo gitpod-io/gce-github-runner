@@ -16,7 +16,7 @@ on:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Delete ephemeral GCE VM
     steps:
       - id: auth
