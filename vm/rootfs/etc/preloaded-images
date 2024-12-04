@@ -1,5 +1,5 @@
 eu.gcr.io/gitpod-core-dev/dev/dev-environment:pd-test-new-preview-gha.24525
-public.ecr.aws/k5t9d3j5/gitpod-next/dev-environment:cw-1715107995b
+eu.gcr.io/gitpod-core-dev/dev/dev-environment:main-gha.30393
 gitpod/workspace-full
 mysql:8.0.33
 bitnami/mysql:8.0.33-debian-11-r24
