@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 RUNNER_USER="runner"
 RUNNER_DIR="/home/${RUNNER_USER}"
-RUNNER_VER=2.321.0
+RUNNER_VER=2.323.0
 
 HELM_VERSION=3.14.0
 PULUMI_VERSION=3.114.0
@@ -163,12 +163,12 @@ echo "📝 Installing leeway..."
 LEEWAY_MAX_PROVENANCE_BUNDLE_SIZE=8388608
 LEEWAY_CACHE_DIR=/var/tmp/cache
 LEEWAY_BUILD_DIR=/var/tmp/build
-LEEWAY_VERSION="0.8.4"
+LEEWAY_VERSION="0.9.6"
 
 mkdir -p "${LEEWAY_CACHE_DIR}" "${LEEWAY_BUILD_DIR}"
 chmod 777 -R /var/tmp/
 
-curl -fsSL https://github.com/gitpod-io/leeway/releases/download/v${LEEWAY_VERSION}/leeway_${LEEWAY_VERSION}_Linux_x86_64.tar.gz | tar -xz -C /usr/local/bin leeway
+curl -fsSL https://github.com/gitpod-io/leeway/releases/download/v${LEEWAY_VERSION}/leeway_Linux_x86_64.tar.gz | tar -xz -C /usr/local/bin leeway
 
 echo "📝 Installing the AWS cli..."
 curl -sfSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&
