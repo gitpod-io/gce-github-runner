@@ -26,7 +26,7 @@ inputs:
   disk_size:
     description: VM disk size.
     required: false
-    default: 300GB
+    default: 500GB
   image_project:
     description: >
       The Google Cloud project against which all image and image family references will be resolved.
