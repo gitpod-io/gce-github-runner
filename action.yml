@@ -21,12 +21,12 @@ inputs:
     required: false
   machine_type:
     description: GCE machine type; https://cloud.google.com/compute/docs/machine-types
-    default: "n2d-standard-8"
+    default: "n2d-standard-32"
     required: true
   disk_size:
     description: VM disk size.
     required: false
-    default: 250GB
+    default: 300GB
   image_project:
     description: >
       The Google Cloud project against which all image and image family references will be resolved.
