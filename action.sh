@@ -194,6 +194,15 @@ EOF
 
 chmod +x /etc/systemd/system/shutdown.sh
 
+mv /usr/bin/tail /usr/bin/tail.real && \
+    echo '#!/bin/bash' > /usr/bin/tail && \
+    echo 'if [ "$GITHUB_ACTIONS" = "true" ]; then' >> /usr/bin/tail && \
+    echo '  exec dumb-init /bin/tail.real "$@"' >> /usr/bin/tail && \
+    echo 'else' >> /usr/bin/tail && \
+    echo '  exec /usr/bin/tail.real "$@"' >> /usr/bin/tail && \
+    echo 'fi' >> /usr/bin/tail && \
+    chmod +x /usr/bin/tail
+
 echo "Registering runners ${RUNNER_ID}-1 and ${RUNNER_ID}-2..."
 su -s /bin/bash -c "cd /actions-runner-1/;/actions-runner-1/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-1 --labels ${VM_ID} --unattended --disableupdate" runner
 su -s /bin/bash -c "cd /actions-runner-2/;/actions-runner-2/config.sh --url https://github.com/${GITHUB_REPOSITORY} --token ${RUNNER_TOKEN} --name ${RUNNER_ID}-2 --labels ${VM_ID} --unattended --disableupdate" runner
