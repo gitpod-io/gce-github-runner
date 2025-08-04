@@ -1,0 +1,76 @@
+name: Check GitHub Actions Runner Version
+
+on:
+  schedule:
+    # Run every weekday at 9 AM UTC
+    - cron: '0 9 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get current runner version
+        id: current-version
+        run: |
+          CURRENT_VERSION=$(grep "RUNNER_VER=" vm/setup.sh | cut -d'=' -f2)
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current runner version: $CURRENT_VERSION"
+
+      - name: Get latest runner version
+        id: latest-version
+        run: |
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "latest=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest runner version: $LATEST_VERSION"
+
+      - name: Compare versions
+        id: compare
+        run: |
+          if [ "${{ steps.current-version.outputs.current }}" != "${{ steps.latest-version.outputs.latest }}" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "Version update needed: ${{ steps.current-version.outputs.current }} -> ${{ steps.latest-version.outputs.latest }}"
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+            echo "Runner version is up to date"
+          fi
+
+      - name: Create PR for version update
+        if: steps.compare.outputs.needs_update == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CURRENT_VERSION="${{ steps.current-version.outputs.current }}"
+          LATEST_VERSION="${{ steps.latest-version.outputs.latest }}"
+          BRANCH_NAME="update-runner-version-$LATEST_VERSION"
+          
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create and switch to new branch
+          git checkout -b "$BRANCH_NAME"
+          
+          # Update the runner version in setup.sh
+          sed -i "s/RUNNER_VER=$CURRENT_VERSION/RUNNER_VER=$LATEST_VERSION/" vm/setup.sh
+          
+          # Commit changes
+          git add vm/setup.sh
+          git commit -m "Update GitHub Actions runner to v$LATEST_VERSION"
+          
+          # Push branch
+          git push origin "$BRANCH_NAME"
+          
+          # Create PR
+          gh pr create \
+            --title "Update GitHub Actions runner to v$LATEST_VERSION" \
+            --body "This PR updates the GitHub Actions runner version from \`$CURRENT_VERSION\` to \`$LATEST_VERSION\`." \
+            --head "$BRANCH_NAME" \
+            --base main
