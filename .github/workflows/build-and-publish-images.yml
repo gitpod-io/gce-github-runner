@@ -1,0 +1,42 @@
+name: Build and Publish GCE Images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'vm/**'
+      - '.github/workflows/build-and-publish-images.yml'
+  workflow_dispatch:
+
+jobs:
+  build-gce-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: "latest"
+
+      - name: Build GCE image with Packer
+        working-directory: vm
+        run: |
+          make build-actions-runner-image
