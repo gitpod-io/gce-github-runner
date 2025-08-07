@@ -33,9 +33,8 @@ inputs:
     required: false
     default: public-github-runners
   image:
-    description: Specifies the name of the image that the disk will be initialized with.
+    description: Specifies the name of the image that the disk will be initialized with. If not provided, will use the latest gh-runner-* image.
     required: false
-    default: gh-runner-202508041322
   image_family:
     description: The image family for the operating system that the boot disk will be initialized with.
     required: false
@@ -94,12 +93,30 @@ runs:
       shell: bash
       run: |
         gcloud auth activate-service-account --key-file ${{ steps.auth.outputs.credentials_file_path }}
+    - name: Get latest runner image
+      id: get-image
+      if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name && inputs.image == ''
+      shell: bash
+      run: |
+        LATEST_IMAGE=$(gcloud compute images list \
+          --project=${{ inputs.image_project }} \
+          --filter="name~'gh-runner-.*'" \
+          --sort-by="~creationTimestamp" \
+          --format="value(name)" \
+          --limit=1)
+        echo "image=${LATEST_IMAGE}" >> $GITHUB_OUTPUT
+        echo "Using latest image: ${LATEST_IMAGE}"
     - name: Create GCE VM
       id: gce-github-runner-script
       if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       shell: bash
       run: |
         set -x
+        
+        IMAGE_TO_USE="${{ inputs.image }}"
+        if [ -z "${IMAGE_TO_USE}" ]; then
+          IMAGE_TO_USE="${{ steps.get-image.outputs.image }}"
+        fi
 
         ${{ github.action_path }}/action.sh \
           --command=start \
@@ -111,7 +128,7 @@ runs:
           --scopes=${{ inputs.scopes }} \
           --shutdown_timeout=${{ inputs.shutdown_timeout }} \
           --image_project=${{ inputs.image_project }} \
-          --image=${{ inputs.image }} \
+          --image="${IMAGE_TO_USE}" \
           --image_family=${{ inputs.image_family }} \
           --label=${{ inputs.label }} \
           --boot_disk_type=pd-ssd \
