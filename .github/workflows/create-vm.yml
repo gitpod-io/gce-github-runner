@@ -33,11 +33,11 @@ jobs:
       machine-zone: ${{ steps.create-runner.outputs.machine-zone }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Authenticate to Google Cloud
         id: auth
         if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@3a3c4c57d294ef65efaaee4ff17b22fa88dd3c69 # v1
         with:
           credentials_json: ${{ secrets.gcp_credentials }}
       - name: Activate GCP service account
